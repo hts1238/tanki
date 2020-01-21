@@ -41,7 +41,7 @@ pygame.key.set_repeat(200, 200)
 
 
 tile_images = {'wall': load_image('box.png'), 'empty': load_image('grass.png')}
-player_image = pygame.transform.scale(load_image('blue1.png'), (40, 40));
+player_image = pygame.transform.rotate(pygame.transform.scale(load_image('blue1.png'), (40, 40)), 180)
 
 tile_width = tile_height = 50
 
@@ -57,6 +57,37 @@ class Player(pygame.sprite.Sprite):
         super().__init__(player_group, all_sprites)
         self.image = player_image
         self.rect = self.image.get_rect().move(tile_width * pos_x + 5, tile_height * pos_y + 5)
+        self.direction = 0 # 0 - up, 1 - right, 2 - down, 3 - left
+
+    def rotate_right(self):
+        self.direction += 1
+        self.direction %= 4
+        self.image = pygame.transform.rotate(self.image, -90)
+
+    def rotate_left(self):
+        self.direction -= 1
+        self.direction %= 4
+        self.image = pygame.transform.rotate(self.image, 90)
+
+    def move_forward(self):
+        if self.direction == 0:
+            self.move_up()
+        if self.direction == 1:
+            self.move_right()
+        if self.direction == 2:
+            self.move_down()
+        if self.direction == 3:
+            self.move_left()
+
+    def move_back(self):
+        if self.direction == 0:
+            self.move_down()
+        if self.direction == 1:
+            self.move_left()
+        if self.direction == 2:
+            self.move_up()
+        if self.direction == 3:
+            self.move_right()
 
     def move_right(self):
         if self.rect.x + tile_width <= WIDTH:
@@ -144,18 +175,14 @@ while True:
             #player.move_right()
             pass
         if event.type == pygame.KEYDOWN:
-            if event.key == 276: # <- left
-                player.move_left()
-                print("left")
-            if event.key == 274: # V  down
-                player.move_down()
-                print("down")
-            if event.key == 275: # -> right
-                player.move_right()
-                print("right")
-            if event.key == 273: # A  up
-                player.move_up()
-                print("up")
+            if event.key == 276 or event.key == 97: # <- left
+                player.rotate_left()
+            if event.key == 274 or event.key == 115: # V  down
+                player.move_back()
+            if event.key == 275 or event.key == 100: # -> right
+                player.rotate_right()
+            if event.key == 273 or event.key == 119: # A  up
+                player.move_forward()
 
     tiles_group.draw(screen)
     player_group.draw(screen)
